@@ -3,13 +3,15 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
     <Nullable>disable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>FIXatdlOrderEntry</RootNamespace>
+    <AssemblyName>FIXatdlOrderEntry</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="OrderDefinition.xml">
+    <None Update="SampleStrategy.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Strategies xmlns="http://www.fixprotocol.org/FIXatdl-1-2/Core"
+            xmlns:val="http://www.fixprotocol.org/FIXatdl-1-2/Validation"
+            xmlns:lay="http://www.fixprotocol.org/FIXatdl-1-2/Layout"
+            xmlns:flow="http://www.fixprotocol.org/FIXatdl-1-2/Flow"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.fixprotocol.org/FIXatdl-1-2/Core fixatdl-core-1-2.xsd"
+            strategyIdentifierTag="7620" versionIdentifierTag="7621">
+    
+    <Strategy name="VWAP" uiRep="VWAP" wireValue="VWAP" version="1.0" fixMsgType="D" providerID="BROKER1">
+        <Description>Volume Weighted Average Price strategy for equities trading</Description>
+        
+        <Parameter name="Symbol" xsi:type="String_t" fixTag="55" use="required">
+            <Description>Trading symbol</Description>
+        </Parameter>
+        
+        <Parameter name="Side" xsi:type="Char_t" fixTag="54" use="required">
+            <Description>Order side</Description>
+            <EnumPair enumID="e_Buy" wireValue="1">Buy</EnumPair>
+            <EnumPair enumID="e_Sell" wireValue="2">Sell</EnumPair>
+            <EnumPair enumID="e_SellShort" wireValue="5">Sell Short</EnumPair>
+        </Parameter>
+        
+        <Parameter name="OrderQty" xsi:type="Qty_t" fixTag="38" use="required">
+            <Description>Order quantity</Description>
+        </Parameter>
+        
+        <Parameter name="OrdType" xsi:type="Char_t" fixTag="40" use="required">
+            <Description>Order type</Description>
+            <EnumPair enumID="e_Market" wireValue="1">Market</EnumPair>
+            <EnumPair enumID="e_Limit" wireValue="2">Limit</EnumPair>
+            <EnumPair enumID="e_Stop" wireValue="3">Stop</EnumPair>
+            <EnumPair enumID="e_StopLimit" wireValue="4">Stop Limit</EnumPair>
+        </Parameter>
+        
+        <Parameter name="Price" xsi:type="Price_t" fixTag="44" use="optional">
+            <Description>Limit price</Description>
+        </Parameter>
+        
+        <Parameter name="StopPx" xsi:type="Price_t" fixTag="99" use="optional">
+            <Description>Stop price</Description>
+        </Parameter>
+        
+        <Parameter name="TimeInForce" xsi:type="Char_t" fixTag="59" use="required">
+            <Description>Time in force</Description>
+            <EnumPair enumID="e_Day" wireValue="0">Day</EnumPair>
+            <EnumPair enumID="e_GTC" wireValue="1">Good Till Cancel</EnumPair>
+            <EnumPair enumID="e_IOC" wireValue="3">Immediate or Cancel</EnumPair>
+            <EnumPair enumID="e_FOK" wireValue="4">Fill or Kill</EnumPair>
+        </Parameter>
+        
+        <Parameter name="Account" xsi:type="String_t" fixTag="1" use="optional">
+            <Description>Account identifier</Description>
+        </Parameter>
+        
+        <Parameter name="StartTime" xsi:type="UTCTimestamp_t" fixTag="7602" use="optional">
+            <Description>Strategy start time</Description>
+        </Parameter>
+        
+        <Parameter name="EndTime" xsi:type="UTCTimestamp_t" fixTag="7603" use="optional">
+            <Description>Strategy end time</Description>
+        </Parameter>
+        
+        <Parameter name="ParticipationRate" xsi:type="Float_t" fixTag="7604" use="optional" minValue="0.01" maxValue="0.50" increment="0.01">
+            <Description>Target participation rate (1% to 50%)</Description>
+        </Parameter>
+        
+        <Parameter name="MaxPctVolume" xsi:type="Float_t" fixTag="7605" use="optional" minValue="0.01" maxValue="1.0" increment="0.01">
+            <Description>Maximum percentage of volume (1% to 100%)</Description>
+        </Parameter>
+        
+        <Parameter name="DisplayQty" xsi:type="Qty_t" fixTag="7606" use="optional">
+            <Description>Display quantity for iceberg orders</Description>
+        </Parameter>
+        
+        <Parameter name="WouldCross" xsi:type="Boolean_t" fixTag="7607" use="optional" falseWireValue="N" trueWireValue="Y">
+            <Description>Allow order to cross the spread</Description>
+        </Parameter>
+        
+        <Parameter name="Aggression" xsi:type="String_t" fixTag="7608" use="optional">
+            <Description>Aggression level</Description>
+            <EnumPair enumID="e_Low" wireValue="L">Low</EnumPair>
+            <EnumPair enumID="e_Medium" wireValue="M">Medium</EnumPair>
+            <EnumPair enumID="e_High" wireValue="H">High</EnumPair>
+        </Parameter>
+        
+        <Parameter name="DarkPoolPreference" xsi:type="String_t" fixTag="7609" use="optional">
+            <Description>Dark pool routing preference</Description>
+            <EnumPair enumID="e_None" wireValue="N">None</EnumPair>
+            <EnumPair enumID="e_Prefer" wireValue="P">Prefer</EnumPair>
+            <EnumPair enumID="e_Only" wireValue="O">Only</EnumPair>
+        </Parameter>
+        
+        <lay:StrategyLayout>
+            <lay:StrategyPanel orientation="VERTICAL" title="Order Details">
+                <lay:Control ID="c_Symbol" xsi:type="lay:TextField_t" label="Symbol:" parameterRef="Symbol"/>
+                <lay:Control ID="c_Side" xsi:type="lay:DropDownList_t" label="Side:" parameterRef="Side">
+                    <lay:ListItem enumID="e_Buy" uiRep="Buy"/>
+                    <lay:ListItem enumID="e_Sell" uiRep="Sell"/>
+                    <lay:ListItem enumID="e_SellShort" uiRep="Sell Short"/>
+                </lay:Control>
+                <lay:Control ID="c_OrderQty" xsi:type="lay:SingleSpinner_t" label="Quantity:" parameterRef="OrderQty" increment="100"/>
+                <lay:Control ID="c_OrdType" xsi:type="lay:DropDownList_t" label="Order Type:" parameterRef="OrdType">
+                    <lay:ListItem enumID="e_Market" uiRep="Market"/>
+                    <lay:ListItem enumID="e_Limit" uiRep="Limit"/>
+                    <lay:ListItem enumID="e_Stop" uiRep="Stop"/>
+                    <lay:ListItem enumID="e_StopLimit" uiRep="Stop Limit"/>
+                </lay:Control>
+                <lay:Control ID="c_Price" xsi:type="lay:SingleSpinner_t" label="Limit Price:" parameterRef="Price" increment="0.01"/>
+                <lay:Control ID="c_StopPx" xsi:type="lay:SingleSpinner_t" label="Stop Price:" parameterRef="StopPx" increment="0.01"/>
+                <lay:Control ID="c_TimeInForce" xsi:type="lay:DropDownList_t" label="Time In Force:" parameterRef="TimeInForce">
+                    <lay:ListItem enumID="e_Day" uiRep="Day"/>
+                    <lay:ListItem enumID="e_GTC" uiRep="Good Till Cancel"/>
+                    <lay:ListItem enumID="e_IOC" uiRep="Immediate or Cancel"/>
+                    <lay:ListItem enumID="e_FOK" uiRep="Fill or Kill"/>
+                </lay:Control>
+                <lay:Control ID="c_Account" xsi:type="lay:TextField_t" label="Account:" parameterRef="Account"/>
+            </lay:StrategyPanel>
+            
+            <lay:StrategyPanel orientation="VERTICAL" title="VWAP Strategy Parameters">
+                <lay:Control ID="c_StartTime" xsi:type="lay:Clock_t" label="Start Time:" parameterRef="StartTime"/>
+                <lay:Control ID="c_EndTime" xsi:type="lay:Clock_t" label="End Time:" parameterRef="EndTime"/>
+                <lay:Control ID="c_ParticipationRate" xsi:type="lay:SingleSpinner_t" label="Participation Rate (%):" parameterRef="ParticipationRate" increment="1" innerIncrement="0.01"/>
+                <lay:Control ID="c_MaxPctVolume" xsi:type="lay:SingleSpinner_t" label="Max % of Volume:" parameterRef="MaxPctVolume" increment="1" innerIncrement="0.01"/>
+                <lay:Control ID="c_DisplayQty" xsi:type="lay:SingleSpinner_t" label="Display Qty (Iceberg):" parameterRef="DisplayQty" increment="100"/>
+                <lay:Control ID="c_WouldCross" xsi:type="lay:CheckBox_t" label="Allow Crossing Spread" parameterRef="WouldCross" checkedEnumRef="Y" uncheckedEnumRef="N"/>
+                <lay:Control ID="c_Aggression" xsi:type="lay:DropDownList_t" label="Aggression:" parameterRef="Aggression">
+                    <lay:ListItem enumID="e_Low" uiRep="Low"/>
+                    <lay:ListItem enumID="e_Medium" uiRep="Medium"/>
+                    <lay:ListItem enumID="e_High" uiRep="High"/>
+                </lay:Control>
+                <lay:Control ID="c_DarkPoolPreference" xsi:type="lay:DropDownList_t" label="Dark Pool:" parameterRef="DarkPoolPreference">
+                    <lay:ListItem enumID="e_None" uiRep="None"/>
+                    <lay:ListItem enumID="e_Prefer" uiRep="Prefer"/>
+                    <lay:ListItem enumID="e_Only" uiRep="Only"/>
+                </lay:Control>
+            </lay:StrategyPanel>
+        </lay:StrategyLayout>
+        
+        <val:StrategyEdit errorMessage="Price is required for Limit and Stop Limit orders">
+            <val:Edit logicOperator="OR">
+                <val:Edit logicOperator="AND">
+                    <val:Edit field="OrdType" operator="NE" value="e_Limit"/>
+                    <val:Edit field="OrdType" operator="NE" value="e_StopLimit"/>
+                </val:Edit>
+                <val:Edit field="Price" operator="EX"/>
+            </val:Edit>
+        </val:StrategyEdit>
+        
+        <val:StrategyEdit errorMessage="Stop Price is required for Stop and Stop Limit orders">
+            <val:Edit logicOperator="OR">
+                <val:Edit logicOperator="AND">
+                    <val:Edit field="OrdType" operator="NE" value="e_Stop"/>
+                    <val:Edit field="OrdType" operator="NE" value="e_StopLimit"/>
+                </val:Edit>
+                <val:Edit field="StopPx" operator="EX"/>
+            </val:Edit>
+        </val:StrategyEdit>
+        
+        <flow:StateRule enabled="false">
+            <val:Edit field="OrdType" operator="NE" value="e_Limit"/>
+            <val:Edit field="OrdType" operator="NE" value="e_StopLimit"/>
+            <flow:AffectedControl id="c_Price"/>
+        </flow:StateRule>
+        
+        <flow:StateRule enabled="false">
+            <val:Edit field="OrdType" operator="NE" value="e_Stop"/>
+            <val:Edit field="OrdType" operator="NE" value="e_StopLimit"/>
+            <flow:AffectedControl id="c_StopPx"/>
+        </flow:StateRule>
+    </Strategy>
+</Strategies>
