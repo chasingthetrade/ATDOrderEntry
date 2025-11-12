@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ATDOrderDefinition>
+  <Metadata>
+    <Title>Order Entry Form</Title>
+    <Version>1.0</Version>
+    <Description>ATD Order Definition for Order Entry System</Description>
+  </Metadata>
+  
+  <Fields>
+    <Field>
+      <Name>OrderNumber</Name>
+      <Label>Order Number</Label>
+      <Type>Text</Type>
+      <Required>true</Required>
+      <MaxLength>20</MaxLength>
+      <ValidationPattern>^ORD-\d{6}$</ValidationPattern>
+      <ValidationMessage>Order number must be in format ORD-XXXXXX (e.g., ORD-123456)</ValidationMessage>
+      <DefaultValue>ORD-</DefaultValue>
+    </Field>
+    
+    <Field>
+      <Name>CustomerName</Name>
+      <Label>Customer Name</Label>
+      <Type>Text</Type>
+      <Required>true</Required>
+      <MinLength>2</MinLength>
+      <MaxLength>100</MaxLength>
+      <ValidationMessage>Customer name is required (2-100 characters)</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>CustomerEmail</Name>
+      <Label>Customer Email</Label>
+      <Type>Email</Type>
+      <Required>true</Required>
+      <ValidationPattern>^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$</ValidationPattern>
+      <ValidationMessage>Please enter a valid email address</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>CustomerPhone</Name>
+      <Label>Customer Phone</Label>
+      <Type>Phone</Type>
+      <Required>true</Required>
+      <ValidationPattern>^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$</ValidationPattern>
+      <ValidationMessage>Please enter a valid phone number (e.g., 555-123-4567)</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>OrderDate</Name>
+      <Label>Order Date</Label>
+      <Type>Date</Type>
+      <Required>true</Required>
+      <ValidationMessage>Order date is required</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>ShippingAddress</Name>
+      <Label>Shipping Address</Label>
+      <Type>TextArea</Type>
+      <Required>true</Required>
+      <MinLength>10</MinLength>
+      <MaxLength>500</MaxLength>
+      <ValidationMessage>Shipping address is required (10-500 characters)</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>City</Name>
+      <Label>City</Label>
+      <Type>Text</Type>
+      <Required>true</Required>
+      <MinLength>2</MinLength>
+      <MaxLength>100</MaxLength>
+      <ValidationMessage>City is required</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>State</Name>
+      <Label>State</Label>
+      <Type>Dropdown</Type>
+      <Required>true</Required>
+      <Options>
+        <Option>AL</Option>
+        <Option>AK</Option>
+        <Option>AZ</Option>
+        <Option>AR</Option>
+        <Option>CA</Option>
+        <Option>CO</Option>
+        <Option>CT</Option>
+        <Option>DE</Option>
+        <Option>FL</Option>
+        <Option>GA</Option>
+        <Option>HI</Option>
+        <Option>ID</Option>
+        <Option>IL</Option>
+        <Option>IN</Option>
+        <Option>IA</Option>
+        <Option>KS</Option>
+        <Option>KY</Option>
+        <Option>LA</Option>
+        <Option>ME</Option>
+        <Option>MD</Option>
+        <Option>MA</Option>
+        <Option>MI</Option>
+        <Option>MN</Option>
+        <Option>MS</Option>
+        <Option>MO</Option>
+        <Option>MT</Option>
+        <Option>NE</Option>
+        <Option>NV</Option>
+        <Option>NH</Option>
+        <Option>NJ</Option>
+        <Option>NM</Option>
+        <Option>NY</Option>
+        <Option>NC</Option>
+        <Option>ND</Option>
+        <Option>OH</Option>
+        <Option>OK</Option>
+        <Option>OR</Option>
+        <Option>PA</Option>
+        <Option>RI</Option>
+        <Option>SC</Option>
+        <Option>SD</Option>
+        <Option>TN</Option>
+        <Option>TX</Option>
+        <Option>UT</Option>
+        <Option>VT</Option>
+        <Option>VA</Option>
+        <Option>WA</Option>
+        <Option>WV</Option>
+        <Option>WI</Option>
+        <Option>WY</Option>
+      </Options>
+      <ValidationMessage>Please select a state</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>ZipCode</Name>
+      <Label>Zip Code</Label>
+      <Type>Text</Type>
+      <Required>true</Required>
+      <ValidationPattern>^\d{5}(-\d{4})?$</ValidationPattern>
+      <ValidationMessage>Please enter a valid zip code (e.g., 12345 or 12345-6789)</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>ProductName</Name>
+      <Label>Product Name</Label>
+      <Type>Text</Type>
+      <Required>true</Required>
+      <MinLength>2</MinLength>
+      <MaxLength>200</MaxLength>
+      <ValidationMessage>Product name is required</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>Quantity</Name>
+      <Label>Quantity</Label>
+      <Type>Number</Type>
+      <Required>true</Required>
+      <MinValue>1</MinValue>
+      <MaxValue>9999</MaxValue>
+      <ValidationMessage>Quantity must be between 1 and 9999</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>UnitPrice</Name>
+      <Label>Unit Price</Label>
+      <Type>Decimal</Type>
+      <Required>true</Required>
+      <MinValue>0.01</MinValue>
+      <MaxValue>999999.99</MaxValue>
+      <DecimalPlaces>2</DecimalPlaces>
+      <ValidationMessage>Unit price must be between $0.01 and $999,999.99</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>ShippingMethod</Name>
+      <Label>Shipping Method</Label>
+      <Type>Dropdown</Type>
+      <Required>true</Required>
+      <Options>
+        <Option>Standard (5-7 days)</Option>
+        <Option>Express (2-3 days)</Option>
+        <Option>Overnight (1 day)</Option>
+      </Options>
+      <ValidationMessage>Please select a shipping method</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>PaymentMethod</Name>
+      <Label>Payment Method</Label>
+      <Type>Dropdown</Type>
+      <Required>true</Required>
+      <Options>
+        <Option>Credit Card</Option>
+        <Option>Debit Card</Option>
+        <Option>PayPal</Option>
+        <Option>Bank Transfer</Option>
+      </Options>
+      <ValidationMessage>Please select a payment method</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>SpecialInstructions</Name>
+      <Label>Special Instructions</Label>
+      <Type>TextArea</Type>
+      <Required>false</Required>
+      <MaxLength>1000</MaxLength>
+      <ValidationMessage>Special instructions cannot exceed 1000 characters</ValidationMessage>
+    </Field>
+    
+    <Field>
+      <Name>GiftWrap</Name>
+      <Label>Gift Wrap</Label>
+      <Type>Checkbox</Type>
+      <Required>false</Required>
+      <DefaultValue>false</DefaultValue>
+    </Field>
+    
+    <Field>
+      <Name>Newsletter</Name>
+      <Label>Subscribe to Newsletter</Label>
+      <Type>Checkbox</Type>
+      <Required>false</Required>
+      <DefaultValue>false</DefaultValue>
+    </Field>
+  </Fields>
+</ATDOrderDefinition>
