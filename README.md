@@ -1,239 +1,315 @@
-# ATD Order System
+# FIXatdl Order Entry System
 
-A C# Windows Forms application that reads an ATD XML definition file and dynamically generates an order input interface with comprehensive field validations.
+A comprehensive C# WPF application for capital markets order entry that dynamically generates trading order interfaces from FIXatdl (FIX Algorithmic Trading Definition Language) 1.2 XML definitions.
 
 ## Overview
 
-This application demonstrates a data-driven approach to form generation where the form structure, field types, validations, and behavior are all defined in an XML file. The application reads the XML definition and creates a complete order entry interface with proper validation rules.
+This application implements a complete FIXatdl 1.2 compliant order entry system for equities trading. It reads FIXatdl XML strategy definitions and dynamically generates a professional order entry interface with full support for:
+
+- Standard FIX order fields (Symbol, Side, OrderQty, OrdType, Price, TimeInForce, etc.)
+- Algorithmic strategy parameters with custom controls
+- Complex validation rules and cross-field dependencies
+- State rules for dynamic enable/disable and visibility control
+- Enum mapping between display values and wire values
+- NewOrderSingle (FIX 35=D) message generation
+
+## What is FIXatdl?
+
+FIXatdl (FIX Algorithmic Trading Definition Language) is an XML-based standard that allows brokers and trading venues to publish the parameters, layouts, and validation rules for their algorithmic trading strategies. Instead of hardcoding order entry screens for each broker, buy-side firms can load the broker's FIXatdl file and dynamically render the appropriate order ticket.
 
 ## Features
 
-- **Dynamic Form Generation**: Reads ATD XML definition and automatically creates form fields
-- **Multiple Field Types**: Supports text, email, phone, date, number, decimal, dropdown, textarea, and checkbox fields
-- **Comprehensive Validations**:
-  - Required field validation
-  - Min/max length validation
-  - Regular expression pattern validation
-  - Numeric range validation
-  - Email format validation
-  - Phone number format validation
-  - Zip code format validation
-- **Real-time Error Display**: Shows validation errors inline with each field
-- **Order Object Creation**: Creates a strongly-typed C# Order object when form is submitted
-- **User-Friendly Interface**: Clean, scrollable form with clear labels and error messages
+### Dynamic UI Generation
+- Reads FIXatdl 1.2 XML definitions
+- Dynamically creates WPF controls based on control types (TextField, DropDownList, SingleSpinner, CheckBox, Clock)
+- Organizes controls into strategy panels with configurable orientation
+- Supports multiple field types: String, Char, Int, Float, Qty, Price, Boolean, UTCTimestamp
+
+### Comprehensive Validation
+- Required field validation
+- Min/max value range validation
+- Increment validation for numeric fields
+- Complex cross-field validation rules with logical operators (AND, OR, XOR, NOT)
+- Real-time validation feedback with inline error messages
+
+### State Rules Engine
+- Dynamic enable/disable of controls based on other field values
+- Dynamic visibility control
+- Automatic re-evaluation on field changes
+- Support for complex conditional logic
+
+### Enum Mapping
+- Maps display-friendly text to wire values for FIX transmission
+- Supports dropdown lists with enum pairs
+- Handles boolean wire values (Y/N, true/false, etc.)
+
+### FIX Order Generation
+- Creates NewOrderSingle DTO with standard FIX fields
+- Includes strategy parameters with proper wire value mapping
+- Generates FIX tag/value pairs ready for transmission
+- Displays formatted order summary
 
 ## Project Structure
 
 ```
-atd-order-system/
-├── ATDOrderSystem.csproj          # Project file
-├── OrderDefinition.xml            # ATD XML definition file
-├── Program.cs                     # Application entry point
-├── Order.cs                       # Order data model class
-├── ATDFieldDefinition.cs          # Field definition model
-├── ATDOrderDefinitionParser.cs    # XML parser
-├── OrderForm.cs                   # Main Windows Forms UI
-└── README.md                      # This file
+FIXatdlOrderEntry/
+├── Models/
+│   ├── FIXatdlParameter.cs       # Parameter definitions and enums
+│   ├── FIXatdlControl.cs         # UI control definitions
+│   ├── FIXatdlLayout.cs          # Layout and panel definitions
+│   ├── FIXatdlRules.cs           # Validation and state rules
+│   ├── FIXatdlStrategy.cs        # Main strategy model
+│   └── NewOrderSingle.cs         # FIX order DTO
+├── Parsers/
+│   └── FIXatdlParser.cs          # XML parser for FIXatdl 1.2
+├── Engine/
+│   ├── ValidationEngine.cs       # Validation rules engine
+│   └── StateRulesEngine.cs       # State rules engine
+├── UI/
+│   ├── OrderEntryWindow.xaml     # Main WPF window
+│   └── OrderEntryWindow.xaml.cs  # UI logic and dynamic form generation
+├── App.xaml                      # WPF application definition
+├── App.xaml.cs                   # Application entry point
+├── SampleStrategy.xml            # Sample VWAP strategy definition
+└── ATDOrderSystem.csproj         # Project file
 ```
 
-## ATD XML Definition
+## FIXatdl XML Structure
 
-The `OrderDefinition.xml` file defines the structure of the order form. It includes:
-
-### Metadata Section
-- Title: Form title
-- Version: Definition version
-- Description: Form description
-
-### Fields Section
-Each field can have the following properties:
-
-- **Name**: Internal field name (used in Order class)
-- **Label**: Display label for the field
-- **Type**: Field type (Text, Email, Phone, Date, Number, Decimal, Dropdown, TextArea, Checkbox)
-- **Required**: Whether the field is required (true/false)
-- **MinLength/MaxLength**: Length constraints for text fields
-- **MinValue/MaxValue**: Range constraints for numeric fields
-- **ValidationPattern**: Regular expression for pattern validation
-- **ValidationMessage**: Custom error message
-- **DefaultValue**: Default value for the field
-- **DecimalPlaces**: Number of decimal places for decimal fields
-- **Options**: List of options for dropdown fields
-
-### Example Field Definition
+### Parameters
+Define the data fields for the order:
 
 ```xml
-<Field>
-  <Name>CustomerEmail</Name>
-  <Label>Customer Email</Label>
-  <Type>Email</Type>
-  <Required>true</Required>
-  <ValidationPattern>^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$</ValidationPattern>
-  <ValidationMessage>Please enter a valid email address</ValidationMessage>
-</Field>
+<Parameter name="Symbol" xsi:type="String_t" fixTag="55" use="required">
+    <Description>Trading symbol</Description>
+</Parameter>
+
+<Parameter name="Side" xsi:type="Char_t" fixTag="54" use="required">
+    <Description>Order side</Description>
+    <EnumPair enumID="e_Buy" wireValue="1">Buy</EnumPair>
+    <EnumPair enumID="e_Sell" wireValue="2">Sell</EnumPair>
+</Parameter>
+```
+
+### Layout
+Define the UI structure:
+
+```xml
+<lay:StrategyLayout>
+    <lay:StrategyPanel orientation="VERTICAL" title="Order Details">
+        <lay:Control ID="c_Symbol" xsi:type="lay:TextField_t" 
+                     label="Symbol:" parameterRef="Symbol"/>
+        <lay:Control ID="c_Side" xsi:type="lay:DropDownList_t" 
+                     label="Side:" parameterRef="Side">
+            <lay:ListItem enumID="e_Buy" uiRep="Buy"/>
+            <lay:ListItem enumID="e_Sell" uiRep="Sell"/>
+        </lay:Control>
+    </lay:StrategyPanel>
+</lay:StrategyLayout>
+```
+
+### Validation Rules
+Define cross-field validation:
+
+```xml
+<val:StrategyEdit errorMessage="Price is required for Limit orders">
+    <val:Edit logicOperator="OR">
+        <val:Edit field="OrdType" operator="NE" value="e_Limit"/>
+        <val:Edit field="Price" operator="EX"/>
+    </val:Edit>
+</val:StrategyEdit>
+```
+
+### State Rules
+Define dynamic control behavior:
+
+```xml
+<flow:StateRule enabled="false">
+    <val:Edit field="OrdType" operator="NE" value="e_Limit"/>
+    <flow:AffectedControl id="c_Price"/>
+</flow:StateRule>
 ```
 
 ## Building and Running
 
 ### Prerequisites
-
 - .NET 6.0 SDK or later
-- Windows operating system (required for Windows Forms)
+- Windows operating system (required for WPF)
 
 ### Build Instructions
 
-1. Open a command prompt or terminal
-2. Navigate to the project directory:
-   ```
-   cd atd-order-system
-   ```
-3. Build the project:
-   ```
-   dotnet build
-   ```
-4. Run the application:
-   ```
-   dotnet run
-   ```
+```bash
+cd ATDOrderEntry
+dotnet build
+dotnet run
+```
 
-Alternatively, you can open the project in Visual Studio and run it from there.
+Or open in Visual Studio and press F5.
 
 ## Usage
 
-1. **Launch the Application**: Run the executable or use `dotnet run`
-2. **Fill Out the Form**: Enter information in all required fields (marked with *)
-3. **Validation**: The form validates fields in real-time when you click Submit
-4. **Submit**: Click the "Submit Order" button to create the order
-5. **View Order**: A message box displays the complete order details
-6. **Create Another**: Choose to create another order or close the application
+1. **Launch Application**: The application loads `SampleStrategy.xml` on startup
+2. **Fill Order Details**: Enter required fields (Symbol, Side, Quantity, Order Type, Time in Force)
+3. **Configure Strategy**: Set VWAP strategy parameters (Start/End Time, Participation Rate, etc.)
+4. **Dynamic Validation**: Controls enable/disable based on order type (e.g., Price field only for Limit orders)
+5. **Submit Order**: Click "Submit Order" to validate and create the NewOrderSingle DTO
+6. **View Results**: See the formatted FIX message with all fields and strategy parameters
 
-## Order Class
+## Sample Strategy
 
-The `Order` class represents the order data with the following properties:
+The included `SampleStrategy.xml` defines a VWAP (Volume Weighted Average Price) strategy with:
 
-- OrderNumber
-- CustomerName
-- CustomerEmail
-- CustomerPhone
-- OrderDate
-- ShippingAddress
-- City
-- State
-- ZipCode
-- ProductName
-- Quantity
-- UnitPrice
-- ShippingMethod
-- PaymentMethod
-- SpecialInstructions
-- GiftWrap
-- Newsletter
-- TotalPrice (calculated property)
+### Standard Order Fields
+- Symbol (55)
+- Side (54): Buy, Sell, Sell Short
+- OrderQty (38)
+- OrdType (40): Market, Limit, Stop, Stop Limit
+- Price (44)
+- StopPx (99)
+- TimeInForce (59): Day, GTC, IOC, FOK
+- Account (1)
 
-## Validation Rules
+### VWAP Strategy Parameters
+- StartTime (7602): Strategy start time
+- EndTime (7603): Strategy end time
+- ParticipationRate (7604): Target participation rate (1-50%)
+- MaxPctVolume (7605): Maximum percentage of volume (1-100%)
+- DisplayQty (7606): Display quantity for iceberg orders
+- WouldCross (7607): Allow crossing the spread
+- Aggression (7608): Low, Medium, High
+- DarkPoolPreference (7609): None, Prefer, Only
 
-The application implements the following validation rules:
+### Validation Rules
+- Price required for Limit and Stop Limit orders
+- Stop Price required for Stop and Stop Limit orders
+- Numeric range validation for participation rates
 
-### Order Number
-- Format: ORD-XXXXXX (e.g., ORD-123456)
-- Required field
+### State Rules
+- Price field disabled unless Order Type is Limit or Stop Limit
+- Stop Price field disabled unless Order Type is Stop or Stop Limit
 
-### Customer Name
-- Length: 2-100 characters
-- Required field
+## Supported Control Types
 
-### Customer Email
-- Valid email format
-- Required field
+- **TextField_t**: Single-line text input
+- **DropDownList_t**: Dropdown selection with enum mapping
+- **SingleSpinner_t**: Numeric input with increment/decrement buttons
+- **CheckBox_t**: Boolean checkbox
+- **Clock_t**: Date/time picker
 
-### Customer Phone
-- Format: (XXX) XXX-XXXX or XXX-XXX-XXXX
-- Required field
+## Supported Parameter Types
 
-### Zip Code
-- Format: XXXXX or XXXXX-XXXX
-- Required field
+- **String_t**: Text strings
+- **Char_t**: Single character (often used with enums)
+- **Int_t**: Integer numbers
+- **Float_t**: Floating point numbers
+- **Qty_t**: Quantity (decimal)
+- **Price_t**: Price (decimal)
+- **Amt_t**: Amount (decimal)
+- **Boolean_t**: True/false with custom wire values
+- **UTCTimestamp_t**: UTC timestamp
+- **LocalMktDate_t**: Local market date
 
-### Quantity
-- Range: 1-9999
-- Required field
+## Validation Operators
 
-### Unit Price
-- Range: $0.01 - $999,999.99
-- 2 decimal places
-- Required field
+- **EQ**: Equal to
+- **NE**: Not equal to
+- **LT**: Less than
+- **LE**: Less than or equal to
+- **GT**: Greater than
+- **GE**: Greater than or equal to
+- **EX**: Exists (not null/empty)
+- **NX**: Not exists (null/empty)
 
-### Shipping Address
-- Length: 10-500 characters
-- Required field
+## Logic Operators
 
-### State
-- Must select from dropdown list
-- Required field
+- **AND**: All conditions must be true
+- **OR**: At least one condition must be true
+- **XOR**: Exactly one condition must be true
+- **NOT**: Condition must be false
 
-### Shipping Method
-- Must select from dropdown list
-- Required field
+## NewOrderSingle Output
 
-### Payment Method
-- Must select from dropdown list
-- Required field
+The application creates a `NewOrderSingle` DTO containing:
+
+### Standard FIX Fields
+- ClOrdID (11): Auto-generated unique order ID
+- Symbol (55)
+- Side (54)
+- OrderQty (38)
+- OrdType (40)
+- Price (44) - if applicable
+- StopPx (99) - if applicable
+- TimeInForce (59)
+- Account (1) - if provided
+- HandlInst (21): Set to "1" (automated)
+- TransactTime (60): UTC timestamp
+
+### Strategy Parameters
+List of parameter name/value pairs with:
+- Parameter name
+- FIX tag (if defined)
+- Display value
+- Wire value (for FIX transmission)
 
 ## Extending the Application
 
-### Adding New Fields
+### Adding New Strategies
 
-To add new fields to the order form:
+1. Create a new FIXatdl 1.2 XML file following the schema
+2. Define parameters with appropriate types and enums
+3. Design the layout with controls and panels
+4. Add validation rules for cross-field dependencies
+5. Add state rules for dynamic behavior
+6. Update the application to load your XML file
 
-1. **Update OrderDefinition.xml**: Add a new `<Field>` element with appropriate properties
-2. **Update Order.cs**: Add a new property to the Order class
-3. **Update OrderForm.cs**: Add getter method in `CreateOrderFromForm()` to map the field value
+### Integrating with FIX Engine
 
-### Adding New Field Types
+To send actual FIX orders:
 
-To add new field types:
+1. Add QuickFIX/n NuGet package
+2. Use `NewOrderSingle.ToFIXTagValuePairs()` to get FIX fields
+3. Create QuickFIX Message and populate fields
+4. Send via FIX session
 
-1. **Update ATDFieldDefinition.cs**: Add any new properties needed for the field type
-2. **Update OrderForm.cs**: Add a new case in `CreateFieldControl()` method
-3. **Update OrderForm.cs**: Add validation logic in `ValidateField()` method
+### Customizing UI
 
-### Customizing Validations
+The WPF UI can be customized by:
+- Modifying styles in `OrderEntryWindow.xaml`
+- Adjusting control creation logic in `OrderEntryWindow.xaml.cs`
+- Adding custom control types in the control factory
 
-Validations are defined in the XML file and can be customized without changing code:
+## FIXatdl 1.2 Compliance
 
-- Use `ValidationPattern` for regex-based validation
-- Use `MinLength`/`MaxLength` for text length validation
-- Use `MinValue`/`MaxValue` for numeric range validation
-- Use `Required` to make fields mandatory
+This implementation supports core FIXatdl 1.2 features:
+- ✅ Parameters with all standard types
+- ✅ EnumPairs for display/wire value mapping
+- ✅ StrategyLayout with panels and controls
+- ✅ Validation rules with logical operators
+- ✅ State rules for enable/disable and visibility
+- ✅ Multiple control types
+- ✅ Required/optional field handling
+- ✅ Min/max/increment constraints
 
 ## Technical Details
 
 ### Architecture
-
-The application follows a clean separation of concerns:
-
-- **Data Layer**: `Order.cs` - Data model
-- **Definition Layer**: `ATDFieldDefinition.cs`, `ATDOrderDefinitionParser.cs` - XML parsing
-- **Presentation Layer**: `OrderForm.cs` - UI and validation logic
-- **Entry Point**: `Program.cs` - Application startup
+- **Model Layer**: FIXatdl data structures
+- **Parser Layer**: XML deserialization
+- **Engine Layer**: Validation and state rule evaluation
+- **UI Layer**: Dynamic WPF form generation
 
 ### Design Patterns
-
-- **Data-Driven Design**: Form structure defined in XML
-- **Factory Pattern**: Dynamic control creation based on field type
-- **Model-View Pattern**: Separation of data (Order) and presentation (OrderForm)
-
-### Error Handling
-
-- XML parsing errors are caught and displayed to the user
-- Validation errors are displayed inline with red text
-- Invalid fields are highlighted with a light red background
-- All errors must be corrected before order submission
+- **Factory Pattern**: Dynamic control creation
+- **Strategy Pattern**: Pluggable validation rules
+- **Observer Pattern**: Field change notifications
+- **DTO Pattern**: NewOrderSingle data transfer
 
 ## License
 
-This is a demonstration application created for educational purposes.
+This is a demonstration application for FIXatdl 1.2 order entry systems.
 
-## Support
+## References
 
-For questions or issues, please refer to the code comments or contact the development team.
+- [FIXatdl Specification](http://www.fixprotocol.org/FIXatdl)
+- [FIX Protocol](https://www.fixtrading.org/)
+- [FIX 4.4 Specification](https://www.fixtrading.org/standards/fix-4-4/)
