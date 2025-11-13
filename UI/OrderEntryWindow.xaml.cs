@@ -253,7 +253,14 @@ namespace FIXatdlOrderEntry.UI
 
             textBox.TextChanged += (s, e) => OnValueChanged(controlDef.ParameterRef);
 
-            return grid;
+            // Wrap the grid in a ContentControl so it can be returned as a Control
+            var contentControl = new ContentControl
+            {
+                Content = grid,
+                ToolTip = parameter.Description
+            };
+
+            return contentControl;
         }
 
         private CheckBox CreateCheckBox(FIXatdlControl controlDef, FIXatdlParameter parameter)
@@ -341,7 +348,7 @@ namespace FIXatdlOrderEntry.UI
             {
                 return datePicker.SelectedDate;
             }
-            else if (control is Grid grid && grid.Children[0] is TextBox spinnerTextBox)
+            else if (control is ContentControl contentControl && contentControl.Content is Grid grid && grid.Children.Count > 0 && grid.Children[0] is TextBox spinnerTextBox)
             {
                 if (decimal.TryParse(spinnerTextBox.Text, out decimal value))
                     return value;
@@ -500,8 +507,8 @@ namespace FIXatdlOrderEntry.UI
                 {
                     datePicker.SelectedDate = DateTime.Now;
                 }
-                else if (control is Grid grid && grid.Children[0] is TextBox spinnerTextBox)
-                {
+				else if (control is ContentControl contentControl && contentControl.Content is Grid grid && grid.Children.Count > 0 && grid.Children[0] is TextBox spinnerTextBox)
+				{
                     spinnerTextBox.Text = "0";
                 }
             }

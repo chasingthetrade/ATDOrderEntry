@@ -53,7 +53,7 @@ namespace FIXatdlOrderEntry.Engine
                 {
                     if (!parameterValues.ContainsKey(parameter.Name) || 
                         parameterValues[parameter.Name] == null ||
-                        (parameterValues[parameter.Name] is string str && string.IsNullOrWhiteSpace(str)))
+                        (parameterValues[parameter.Name] is string strReq && string.IsNullOrWhiteSpace(strReq)))
                     {
                         result.ErrorMessages.Add($"{parameter.Name} is required");
                     }
@@ -136,11 +136,11 @@ namespace FIXatdlOrderEntry.Engine
             {
                 case EditOperator.EX:
                     return fieldValue != null && 
-                           !(fieldValue is string str && string.IsNullOrWhiteSpace(str));
+                           !(fieldValue is string strEx && string.IsNullOrWhiteSpace(strEx));
                 
                 case EditOperator.NX:
                     return fieldValue == null || 
-                           (fieldValue is string str && string.IsNullOrWhiteSpace(str));
+                           (fieldValue is string strNx && string.IsNullOrWhiteSpace(strNx));
                 
                 case EditOperator.EQ:
                     return CompareValues(fieldValue, edit.Value) == 0;
